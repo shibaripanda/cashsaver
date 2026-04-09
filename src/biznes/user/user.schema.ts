@@ -6,14 +6,11 @@ export type UserDocument = HydratedDocument<User>;
 
 @Schema({ timestamps: true })
 export class User {
-  // @Prop()
-  // _id: Types.ObjectId;
-
   @Prop({ required: true, unique: true })
-  t_Id?: number;
+  telegram_id!: number;
 
   @Prop()
-  t_username!: string;
+  username!: string;
 
   @Prop()
   language_code!: string;
@@ -34,4 +31,4 @@ export class User {
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-// UserSchema.index({ subscriptionExpiresAt: 1, status: 1 });
+// UserSchema.index({ telegram_id: 1 });

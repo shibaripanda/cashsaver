@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { AppService } from './app.service';
 import { GlobalConfigModule } from 'src/globalConfig/globalConfig.module';
 import { BotModule } from 'src/bot/bot.module';
@@ -8,6 +8,7 @@ import { CheckModule } from 'src/biznes/check/check.module';
 import { ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
+@Global()
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -23,5 +24,6 @@ import { MongooseModule } from '@nestjs/mongoose';
     CheckModule,
   ],
   providers: [AppService],
+  exports: [AppService],
 })
 export class AppModule {}

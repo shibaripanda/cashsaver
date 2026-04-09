@@ -5,6 +5,8 @@ import { Ctx, Start, Update } from 'nestjs-telegraf';
 import { ConfigService } from '@nestjs/config';
 import { BotService } from './bot.service';
 import { UserContext } from './interfaces/MyContext';
+import { UseGuards } from '@nestjs/common';
+import { AccessGuard } from './guards/access-control.guard';
 
 @Update()
 export class TelegramGateway {
@@ -16,7 +18,7 @@ export class TelegramGateway {
     private config: ConfigService,
   ) {}
 
-  // @UseGuards(AdminAccessGuard)
+  @UseGuards(AccessGuard)
   @Start()
   async start(@Ctx() ctx: UserContext) {
     console.log('@Start');

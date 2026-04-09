@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Hello World!';
+  getBlockUsers(): number[] {
+    return [244242424, 2424242424];
   }
 }

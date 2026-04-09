@@ -1,20 +1,20 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-// import { Context as TelegrafContext } from 'telegraf';
+import { AppService } from 'src/app/app.service';
+import { Context as TelegrafContext } from 'telegraf';
 
 @Injectable()
-export class AdminAccessGuard implements CanActivate {
-  // constructor(private readonly userService: UserService) {}
+export class AccessGuard implements CanActivate {
+  constructor(private readonly appService: AppService) {}
 
   // eslint-disable-next-line @typescript-eslint/require-await
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // const ctx = context.getArgByIndex<TelegrafContext>(0);
+    const ctx = context.getArgByIndex<TelegrafContext>(0);
     console.log('AdminGuardAccess');
-    // console.log(ctx.from);
-    // const userId = ctx?.from?.id;
+    const userId = ctx?.from?.id;
 
-    // if (!userId) return false;
+    if (!userId) return false;
 
-    // const isAllowed = this.userService.admins.includes(userId);
-    return true;
+    const isAllowed = !this.appService.getBlockUsers().includes(userId);
+    return isAllowed;
   }
 }

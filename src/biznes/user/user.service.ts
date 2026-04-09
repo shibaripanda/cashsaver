@@ -135,7 +135,10 @@ export class UserService {
   ): Promise<UserDocument | null> {
     console.log('ddddd');
     const ex = await this.userModel
-      .findOne({ t_Id: telegramUser.id }, { _id: 1, lastMessageId: 1, use: 1 })
+      .findOne(
+        { telegram_id: telegramUser.id },
+        { __v: 0, accounts: 0, updatedAt: 0, createdAt: 0 },
+      )
       // .lean()
       .exec();
     if (ex) {
@@ -159,7 +162,7 @@ export class UserService {
   private async createNewUser(user: TelegramUser): Promise<UserDocument> {
     // const zeroAccount = await this.accountService.createTargetAccount();
     const created = new this.userModel({
-      t_Id: user.id,
+      telegram_id: user.id,
       // t_username: user.username ?? '',
       language_code: user.language_code,
       // accounts: [zeroAccount],
