@@ -1,20 +1,25 @@
 // import { UseGuards } from '@nestjs/common';
 // import { CallbackQuery, Message } from '@telegraf/types';
-import { Ctx, Start, Update } from 'nestjs-telegraf';
+import { Action, Ctx, On, Start, Update } from 'nestjs-telegraf';
 // import { AdminAccessGuard } from './guards/access-control.guard';
 import { ConfigService } from '@nestjs/config';
 import { BotService } from './bot.service';
 import { UserContext } from './interfaces/MyContext';
 import { UseGuards } from '@nestjs/common';
 import { AccessGuard } from './guards/access-control.guard';
+import { BotTextService } from './bot.text.service';
+import { UserService } from 'src/biznes/user/user.service';
+import { BotKeyboardService } from './bot.keyboard.service';
+import { BotBiznesService } from './bot.biznes.service';
 
 @Update()
 export class TelegramGateway {
   constructor(
     private botService: BotService,
-    // private botKeyboardService: BotKeyboardService,
-    // private botTextService: BotTextService,
-    // private botBiznesService: BotBiznesService,
+    private botKeyboardService: BotKeyboardService,
+    private botTextService: BotTextService,
+    private userService: UserService,
+    private botBiznesService: BotBiznesService,
     private config: ConfigService,
   ) {}
 
@@ -26,17 +31,16 @@ export class TelegramGateway {
 
     console.log(ctx.simpleUserDocument);
 
-    // const user = await this.botService.getUser(ctx.from);
-    // const simpleUser = await this.botService.getSimpleUser(ctx.from);
-    // const userId = await this.botService.getUserId(ctx.from);
-
-    // console.log('UserId', userId);
-    // console.log('SimpleUser', simpleUser);
-    // console.log('User', user);
-
-    // const keyboard = this.botKeyboardService.keyboardStart();
-    // const text = this.botTextService.textStart();
-    // await this.botService.sendMessageReply(ctx, text, keyboard);
+    const MyAccountListWithChecksSumsAndCounts =
+      await this.userService.getMyAccountListWithChecksSumsAndCounts(
+        ctx.simpleUserDocument._id,
+      );
+    if (!MyAccountListWithChecksSumsAndCounts) return;
+    const text = this.botTextService.textStart();
+    const keyboard = this.botKeyboardService.keyboardMyAccounts(
+      MyAccountListWithChecksSumsAndCounts,
+    );
+    await this.botService.sendMessageReply(ctx, text, keyboard);
   }
 
   // @Action(/^myAcc:(.+)$/)
@@ -62,16 +66,27 @@ export class TelegramGateway {
   //   await this.botService.sendMessageReplyAction(ctx, text, keyboard);
   // }
 
-  // @Action('myAccounts')
-  // async myAccounts(@Ctx() ctx: UserTelegrafContext) {
-  //   console.log('myAccounts');
-  //   await ctx.answerCbQuery();
-  //   await ctx.sendChatAction('typing');
-  //   const myAccounts = await this.botService.getMyAccounts(ctx.from);
-  //   if (!myAccounts) return;
-  //   const { text, keyboard } = this.botBiznesService.myAccounts(myAccounts);
-  //   await this.botService.sendMessageReply(ctx, text, keyboard);
-  // }
+  @Action('disabled_zero_checks')
+  async disabledButton(@Ctx() ctx: UserContext) {
+    await ctx.answerCbQuery('Нет чеков', { show_alert: true });
+  }
+
+  @Action('myAccounts')
+  async myAccounts(@Ctx() ctx: UserContext) {
+    console.log('myAccounts');
+    await ctx.answerCbQuery();
+    await ctx.sendChatAction('typing');
+    const MyAccountListWithChecksSumsAndCounts =
+      await this.userService.getMyAccountListWithChecksSumsAndCounts(
+        ctx.simpleUserDocument._id,
+      );
+    if (!MyAccountListWithChecksSumsAndCounts) return;
+    const text = this.botTextService.textStart();
+    const keyboard = this.botKeyboardService.keyboardMyAccounts(
+      MyAccountListWithChecksSumsAndCounts,
+    );
+    await this.botService.sendMessageReply(ctx, text, keyboard);
+  }
 
   // @Action('mainMenu')
   // async mainMenu(@Ctx() ctx: UserTelegrafContext) {
@@ -83,31 +98,37 @@ export class TelegramGateway {
   //   await this.botService.sendMessageReply(ctx, text, keyboard);
   // }
 
-  // @On('text')
-  // async onText(@Ctx() ctx: UserTelegrafContext) {
-  //   await ctx.sendChatAction('typing');
-  //   const message = ctx.message as Message.TextMessage;
-  //   const maxLengthTextMessage = Number(
-  //     this.config.get<string>('MAX_LENGTH_TEXT_MESSAGE')!,
-  //   );
-  //   console.log('DURATION:', message.text.length, '/', maxLengthTextMessage);
+  @On('text')
+  async onText(@Ctx() ctx: UserContext) {
+    await ctx.sendChatAction('typing');
+    const message = ctx.message;
+    const maxLengthTextMessage = Number(
+      this.config.get<string>('MAX_LENGTH_TEXT_MESSAGE')!,
+    );
+    console.log('DURATION:', message.text.length, '/', maxLengthTextMessage);
 
-  //   const user = await this.botService.getUserSimpleAccounts(ctx.from);
-  //   if (!user) return;
-  //   if (message.text.length > maxLengthTextMessage) {
-  //     await this.botService.sendMessageReply(
-  //       ctx,
-  //       `Alert, too long text message\nMax length: ${maxLengthTextMessage}`,
-  //     );
-  //     return;
-  //   }
-  //   const res = await this.botService.textMessageProcessing(message.text, user);
-  //   const { text, keyboard } = await this.botBiznesService.biznesStep(
-  //     res,
-  //     user,
-  //   );
-  //   await this.botService.sendMessageReply(ctx, text, keyboard);
-  // }
+    const userAccounts = await this.userService.getAccountNames(
+      ctx.simpleUserDocument._id,
+    );
+    if (!userAccounts) return;
+    if (message.text.length > maxLengthTextMessage) {
+      await this.botService.sendMessageReply(
+        ctx,
+        `kdkd\nMax length: ${maxLengthTextMessage}`,
+      );
+      return;
+    }
+    const res = await this.botService.textMessageProcessing(
+      message.text,
+      userAccounts,
+    );
+    const { text, keyboard } = await this.botBiznesService.biznesStep(
+      ctx.simpleUserDocument,
+      res,
+      userAccounts,
+    );
+    await this.botService.sendMessageReply(ctx, text, keyboard);
+  }
 
   // @On('voice')
   // async onVoice(@Ctx() ctx: UserTelegrafContext) {

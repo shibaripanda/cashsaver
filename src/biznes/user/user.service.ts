@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './user.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { AccountService } from '../account/account.service';
 import { CheckService } from '../check/check.service';
 import type { User as TelegramUser } from '@telegraf/types';
+import { AccountForList } from 'src/bot/interfaces/AccountForList';
+import { AccountNameAndId } from 'src/openai/interfaces/UserAccounts';
+// import { Types } from 'telegraf';
 
 // import { User as TelegramUser } from 'telegraf';
 
@@ -33,52 +36,39 @@ export class UserService {
   //   await this.userModel.updateOne({ t_Id }, { lastMessageId });
   // }
 
-  // async getUserSimpleAccounts(user: TelegramUser) {
-  //   if (!user) return null;
+  async getAccountNames(
+    _id: Types.ObjectId,
+  ): Promise<AccountNameAndId[] | false> {
+    const res = await this.userModel
+      .findById(_id, { accounts: 1 })
+      .populate({
+        path: 'accounts',
+      })
+      .lean()
+      .exec();
+    if (!res) return false;
+    return res.accounts.map((ac) => ({ name: ac.name, _id: ac._id }));
+  }
 
-  //   const res = await this.userModel
-  //     .findOne({ t_Id: user.id }, { accounts: 1 })
-  //     .populate({
-  //       path: 'accounts',
-  //       // populate: { path: 'checks' },
-  //     })
-  //     .lean()
-  //     .exec();
-  //   return res;
-  // }
-
-  // async getMyAccounts(user: TelegramUser) {
-  //   if (!user) return null;
-
-  //   const res = await this.userModel
-  //     .findOne({ t_Id: user.id }, { accounts: 1 })
-  //     .populate({
-  //       path: 'accounts',
-  //       populate: { path: 'checks' },
-  //     })
-  //     .lean()
-  //     .exec();
-  //   return res?.accounts.map((ac) => ({
-  //     name: ac.name,
-  //     _id: ac._id,
-  //     sum: ac.checks.reduce((acc, ch) => acc + ch.cost, 0),
-  //     count: ac.checks.length,
-  //   }));
-  // }
-
-  // async getUserId(user: TelegramUser): Promise<{ _id: Types.ObjectId } | null> {
-  //   if (!user) return null;
-
-  //   const ex = await this.userModel
-  //     .findOne({ t_Id: user.id }, { _id: 1 })
-  //     .lean()
-  //     .exec();
-  //   if (ex) {
-  //     return ex;
-  //   }
-  //   const newUser = await this.createNewUser(user);
-  //   return { _id: newUser._id };
-  // }
+  async getMyAccountListWithChecksSumsAndCounts(
+    _id: Types.ObjectId,
+  ): Promise<AccountForList[] | []> {
+    const res = await this.userModel
+      .findById(_id, { accounts: 1 })
+      .populate({
+        path: 'accounts',
+        populate: { path: 'checks' },
+      })
+      .lean()
+      .exec();
+    if (!res) return [];
+    return res.accounts.map((ac) => ({
+      name: ac.name,
+      _id: ac._id,
+      sum: ac.checks.reduce((acc, ch) => acc + ch.cost, 0),
+      count: ac.checks.length,
+    }));
+  }
 
   // async createNewCheck(userId: Types.ObjectId, checks: NewCheck[]) {
   //   for (const check of checks) {
@@ -112,34 +102,14 @@ export class UserService {
   //   };
   // }
 
-  // async getNewOrExistUser(user: TelegramUser): Promise<User | null> {
-  //   if (!user) return null;
-
-  //   const ex = await this.userModel
-  //     .findOne({ t_Id: user.id })
-  //     .populate({
-  //       path: 'accounts',
-  //       populate: { path: 'checks' },
-  //     })
-  //     .lean()
-  //     .exec();
-  //   if (ex) {
-  //     await this.updateUser(user, ex);
-  //     return ex;
-  //   }
-  //   return await this.createNewUser(user);
-  // }
-
   async getNewOrExistSimpleUser(
     telegramUser: TelegramUser,
   ): Promise<UserDocument | null> {
-    console.log('ddddd');
     const ex = await this.userModel
       .findOne(
         { telegram_id: telegramUser.id },
         { __v: 0, accounts: 0, updatedAt: 0, createdAt: 0 },
       )
-      // .lean()
       .exec();
     if (ex) {
       return ex;
@@ -147,27 +117,22 @@ export class UserService {
     return await this.createNewUser(telegramUser);
   }
 
-  // private async updateUser(user: TelegramUser, ex: UserDocument) {
-  //   if (
-  //     ex.t_username !== user.username ||
-  //     ex.language_code !== user.language_code
-  //   ) {
-  //     await this.userModel.updateOne(
-  //       { _id: ex._id },
-  //       { t_username: user.username, language_code: user.language_code },
-  //     );
-  //   }
-  // }
-
   private async createNewUser(user: TelegramUser): Promise<UserDocument> {
-    // const zeroAccount = await this.accountService.createTargetAccount();
+    const startAccounts = await this.accountService.createStartAccounts([
+      'Еда',
+      'Еда вне дома',
+      'Транспорт',
+      'Развлечения',
+      'Здоровье',
+      'Одежда',
+      'Коммуналка',
+      'Другое',
+    ]);
     const created = new this.userModel({
       telegram_id: user.id,
-      // t_username: user.username ?? '',
       language_code: user.language_code,
-      // accounts: [zeroAccount],
+      accounts: startAccounts.map((account) => account._id),
     });
-    console.log('ssss');
     return created.save();
   }
 }

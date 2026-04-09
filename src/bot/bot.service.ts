@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { InlineKeyboardButton } from '@telegraf/types';
 import { InjectBot } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
+import { UserContext } from './interfaces/MyContext';
+// import { Types } from 'mongoose';
+import { AccountNameAndId } from 'src/openai/interfaces/UserAccounts';
+import { Expense } from 'src/openai/interfaces/Expense';
+import { OpenaiVoiceService } from 'src/openai/openai.voice.service';
 // import axios, { AxiosResponse } from 'axios';
 // import {
 //   InlineKeyboardButton,
@@ -13,7 +19,7 @@ import { Telegraf } from 'telegraf';
 export class BotService {
   constructor(
     @InjectBot() private bot: Telegraf,
-    // private openaiVoiceService: OpenaiVoiceService,
+    private openaiVoiceService: OpenaiVoiceService,
   ) {}
 
   // async getAccountWithChecks(telegramUser: tUser, account_id: string) {
@@ -38,13 +44,16 @@ export class BotService {
   //   return res;
   // }
 
-  // async textMessageProcessing(
-  //   text: string,
-  //   user: ServerUser,
-  // ): Promise<Expense> {
-  //   const res = await this.openaiVoiceService.textOpenAIProcessing(text, user);
-  //   return res;
-  // }
+  async textMessageProcessing(
+    text: string,
+    userAccounts: AccountNameAndId[],
+  ): Promise<Expense> {
+    const res = await this.openaiVoiceService.textOpenAIProcessing(
+      text,
+      userAccounts,
+    );
+    return res;
+  }
 
   // async voiceMessageProcessing(
   //   voiceFile_id: string,
@@ -114,32 +123,34 @@ export class BotService {
   //   });
   // }
 
-  // async sendMessageReply(
-  //   ctx: UserTelegrafContext,
-  //   text: string,
-  //   keyboard?: InlineKeyboardButton[][],
-  // ): Promise<void> {
-  //   const mes = await this.bot.telegram.sendMessage(ctx.from.id, text, {
-  //     reply_markup: keyboard && { inline_keyboard: keyboard },
-  //     parse_mode: 'HTML',
-  //   });
-  //   await this.deleteOrUpdateMessage(ctx.from.id, ctx.simpleUser.lastMessageId);
-  //   this.kafkaService.kafkaEmit('updateLastMessageId', {
-  //     t_Id: ctx.from.id,
-  //     lastMessageId: mes.message_id,
-  //   });
-  // }
+  async sendMessageReply(
+    ctx: UserContext,
+    text: string,
+    keyboard?: InlineKeyboardButton[][],
+  ): Promise<void> {
+    const mes = await this.bot.telegram.sendMessage(ctx.from.id, text, {
+      reply_markup: keyboard && { inline_keyboard: keyboard },
+      parse_mode: 'HTML',
+    });
+    await this.deleteOrUpdateMessage(
+      ctx.from.id,
+      ctx.simpleUserDocument.lastMessageId,
+    );
+    await ctx.simpleUserDocument
+      .updateOne({ lastMessageId: mes.message_id })
+      .exec();
+  }
 
-  // private async deleteOrUpdateMessage(chatId: number, message_id: number) {
-  //   try {
-  //     await this.bot.telegram.editMessageReplyMarkup(chatId, message_id, '', {
-  //       inline_keyboard: [],
-  //     });
-  //     // await this.bot.telegram.deleteMessage(chatId, message_id);
-  //   } catch {
-  //     await this.bot.telegram.editMessageText(chatId, message_id, '', '...');
-  //   }
-  // }
+  private async deleteOrUpdateMessage(chatId: number, message_id: number) {
+    try {
+      if (!message_id) return;
+      await this.bot.telegram.editMessageReplyMarkup(chatId, message_id, '', {
+        inline_keyboard: [],
+      });
+    } catch {
+      await this.bot.telegram.editMessageText(chatId, message_id, '', '...');
+    }
+  }
 
   // private async getVoiceBuffer(file_id: string) {
   //   const flink = await this.getFileLink(file_id);

@@ -7,6 +7,7 @@ import { AccountModule } from 'src/biznes/account/account.module';
 import { CheckModule } from 'src/biznes/check/check.module';
 import { ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { OpenaiModule } from 'src/openai/openai.module';
 
 @Global()
 @Module({
@@ -22,6 +23,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     UserModule,
     AccountModule,
     CheckModule,
+    OpenaiModule,
   ],
   providers: [AppService],
   exports: [AppService],

@@ -9,9 +9,6 @@ export class Account {
   @Prop({ required: true })
   name!: string;
 
-  @Prop({ default: 0 })
-  count!: number;
-
   @Prop({
     type: [{ type: Types.ObjectId, ref: 'Check', autopopulate: true }],
     required: true,

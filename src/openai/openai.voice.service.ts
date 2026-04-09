@@ -1,92 +1,66 @@
 import { Inject, Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
-import { writeFile, unlink } from 'fs/promises';
-import { tmpdir } from 'os';
-import { join } from 'path';
-import { createReadStream } from 'fs';
-
-export interface Expense {
-  step: number;
-  data: CreateNewCategory | CreateNewCheck;
-}
-
-export interface Account1 {
-  _id: string;
-  name: string;
-  count: number;
-  checks: Check1[];
-  sum: number;
-}
-
-export interface CreateNewCategory {
-  newAccounts: string[];
-}
-
-export interface Check1 {
-  account: string;
-  info: string;
-  cost: number;
-  _id?: string;
-}
-
-export interface CreateNewCheck {
-  newChecks: Check1[];
-}
+// import { writeFile, unlink } from 'fs/promises';
+// import { tmpdir } from 'os';
+// import { join } from 'path';
+// import { createReadStream } from 'fs';
+import { AccountNameAndId } from './interfaces/UserAccounts';
+import { Expense } from './interfaces/Expense';
 
 @Injectable()
 export class OpenaiVoiceService {
   constructor(@Inject('OPENAI_CLIENT') private readonly openai: OpenAI) {}
 
-  private async transcribe(audioBuffer: Buffer) {
-    const filePath = join(tmpdir(), `voice-${Date.now()}.ogg`);
-    await writeFile(filePath, audioBuffer);
+  //   private async transcribe(audioBuffer: Buffer) {
+  //     const filePath = join(tmpdir(), `voice-${Date.now()}.ogg`);
+  //     await writeFile(filePath, audioBuffer);
 
-    try {
-      const stream = createReadStream(filePath);
+  //     try {
+  //       const stream = createReadStream(filePath);
 
-      const transcription = await this.openai.audio.transcriptions.create({
-        file: stream,
-        model: 'gpt-4o-transcribe',
-      });
+  //       const transcription = await this.openai.audio.transcriptions.create({
+  //         file: stream,
+  //         model: 'gpt-4o-transcribe',
+  //       });
 
-      return transcription.text;
-    } finally {
-      await unlink(filePath).catch(() => {});
-    }
-  }
+  //       return transcription.text;
+  //     } finally {
+  //       await unlink(filePath).catch(() => {});
+  //     }
+  //   }
 
-  private async describeImage(
-    imageBuffer: Buffer,
-    link: string,
-  ): Promise<string> {
-    // const base64 = imageBuffer.toString('base64');
+  //   private async describeImage(
+  //     imageBuffer: Buffer,
+  //     link: string,
+  //   ): Promise<string> {
+  //     // const base64 = imageBuffer.toString('base64');
 
-    const res = await this.openai.responses.create({
-      model: 'gpt-4.1',
-      input: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'input_text',
-              text: `
-Извлеки весь текст с этого чека максимально точно.
-Ничего не анализируй.
-Верни только текст.
-`,
-            },
-            {
-              type: 'input_image',
-              image_url: link,
-              detail: 'high',
-            },
-          ],
-        },
-      ],
-    });
+  //     const res = await this.openai.responses.create({
+  //       model: 'gpt-4.1',
+  //       input: [
+  //         {
+  //           role: 'user',
+  //           content: [
+  //             {
+  //               type: 'input_text',
+  //               text: `
+  // Извлеки весь текст с этого чека максимально точно.
+  // Ничего не анализируй.
+  // Верни только текст.
+  // `,
+  //             },
+  //             {
+  //               type: 'input_image',
+  //               image_url: link,
+  //               detail: 'high',
+  //             },
+  //           ],
+  //         },
+  //       ],
+  //     });
 
-    return res.output_text;
-  }
+  //     return res.output_text;
+  //   }
 
   private async openaiReqest(request: string, content: string) {
     const res = await this.openai.chat.completions.create({
@@ -185,7 +159,7 @@ Step 0 — непонятно
 ФОРМАТЫ ОТВЕТА
 
 Step 1
-{"step":1,"data":{"newAccounts":["категория"]}}
+{"step":1,"data": ["категория"]}
 
 Step 2
 {"step":2,"data":{"newChecks": [{"account":"категория","info":"описание","cost":100.50}]}}
@@ -227,11 +201,11 @@ Step 0
   //   return res;
   // }
 
-  // async textOpenAIProcessing(text: string, user: ServerUser) {
-  //   const accounts = user.accounts.map((a) => a.name);
-  //   const res = await this.choosingNextStep(text, accounts);
-  //   return res;
-  // }
+  async textOpenAIProcessing(text: string, userAccounts: AccountNameAndId[]) {
+    const accounts = userAccounts.map((a) => a.name);
+    const res = await this.choosingNextStep(text, accounts);
+    return res;
+  }
 
   // async voiceOpenAIProcessing(voiceBuffer: Buffer, user: ServerUser) {
   //   const text = await this.transcribe(voiceBuffer);

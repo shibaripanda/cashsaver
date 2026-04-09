@@ -21,7 +21,7 @@ export const accessControlMiddleware = (): MiddlewareFn<UserContext> => {
     await simpleUser.save();
     ctx.simpleUserDocument = simpleUser;
 
-    console.log(ctx.simpleUserDocument);
+    // console.log(ctx.simpleUserDocument);
 
     await next();
   };

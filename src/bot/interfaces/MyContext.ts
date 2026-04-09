@@ -1,23 +1,29 @@
 import { Context, NarrowedContext } from 'telegraf';
-// import { SimpleUser } from './User';
 import { Update } from '@telegraf/types';
 import { UserDocument } from 'src/biznes/user/user.schema';
 import { Message } from 'telegraf/types';
 
 export interface MyContext extends Context {
-  simpleUserDocument: UserDocument | null;
+  simpleUserDocument: UserDocument;
 }
 
 // export type UserContext = NarrowedContext<MyContext, Update.MessageUpdate>;
 
+// export type UserTextContext = NarrowedContext<
+//   MyContext,
+//   Update.MessageUpdate & { message: Message.TextMessage }
+// >;
+
 export type UserContext = NarrowedContext<
   MyContext,
-  Update.MessageUpdate & { message: Message.VoiceMessage }
+  Update.MessageUpdate & { message: Message.VoiceMessage } & {
+    message: Message.TextMessage;
+  }
 >;
 
 // export type CallbackContext = NarrowedContext<
 //   MyContext,
-//   UpdateTelegraf.CallbackQueryUpdate & {
+//   Update.CallbackQueryUpdate & {
 //     callbackQuery: CallbackQuery.DataQuery;
 //   }
 // >;
