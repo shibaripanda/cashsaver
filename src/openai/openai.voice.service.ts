@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
-// import { writeFile, unlink } from 'fs/promises';
-// import { tmpdir } from 'os';
-// import { join } from 'path';
-// import { createReadStream } from 'fs';
+import { writeFile, unlink } from 'fs/promises';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import { createReadStream } from 'fs';
 import { AccountNameAndId } from './interfaces/UserAccounts';
 import { Expense } from './interfaces/Expense';
 
@@ -11,23 +11,23 @@ import { Expense } from './interfaces/Expense';
 export class OpenaiVoiceService {
   constructor(@Inject('OPENAI_CLIENT') private readonly openai: OpenAI) {}
 
-  //   private async transcribe(audioBuffer: Buffer) {
-  //     const filePath = join(tmpdir(), `voice-${Date.now()}.ogg`);
-  //     await writeFile(filePath, audioBuffer);
+  private async transcribe(audioBuffer: Buffer) {
+    const filePath = join(tmpdir(), `voice-${Date.now()}.ogg`);
+    await writeFile(filePath, audioBuffer);
 
-  //     try {
-  //       const stream = createReadStream(filePath);
+    try {
+      const stream = createReadStream(filePath);
 
-  //       const transcription = await this.openai.audio.transcriptions.create({
-  //         file: stream,
-  //         model: 'gpt-4o-transcribe',
-  //       });
+      const transcription = await this.openai.audio.transcriptions.create({
+        file: stream,
+        model: 'gpt-4o-transcribe',
+      });
 
-  //       return transcription.text;
-  //     } finally {
-  //       await unlink(filePath).catch(() => {});
-  //     }
-  //   }
+      return transcription.text;
+    } finally {
+      await unlink(filePath).catch(() => {});
+    }
+  }
 
   //   private async describeImage(
   //     imageBuffer: Buffer,
@@ -115,14 +115,11 @@ Step 1 — создать категории
 Step 2 — добавить расход  
 если пользователь сообщает о трате денег
 
-Step 3 — узнать сумму расходов  
-если пользователь спрашивает сколько потратил
+Step 3 — установить месячный бюджет для категории  
+если пользователь хочет установить или изменить месячный бюджет для конкретной категории
 
-Step 4 — удалить категории  
-если пользователь хочет удалить категории
-
-Step 5 — узнать баланс  
-если пользователь спрашивает баланс / остаток
+Step 4 — установить общий месячный бюджет  
+если пользователь хочет установить или изменить общий месячный бюджет
 
 Step 0 — непонятно  
 если намерение нельзя определить однозначно
@@ -136,9 +133,10 @@ Step 0 — непонятно
 - с большой буквы все категории
 - если после фильтрации список пуст → step 0
 
-Для Step 2–4:
+Для Step 2:
 - использовать можно только категории из списка
 - категории вне списка игнорировать
+- с большой буквы
 - если после фильтрации не осталось категорий → step 0
 - если категория не указана явно → step 0
 
@@ -162,16 +160,13 @@ Step 1
 {"step":1,"data": ["категория"]}
 
 Step 2
-{"step":2,"data":{"newChecks": [{"account":"категория","info":"описание","cost":100.50}]}}
+{"step":2,"data":[{"account":"категория","info":"описание","cost":100.50}]}
 
 Step 3
-{"step":3,"data":{"account":["категория"]}}
+{"step":3,"data": [{"account":"категория","budget":100.50}]}
 
 Step 4
-{"step":4,"data":{"account":["категория"]}}
-
-Step 5
-{"step":5,"data":null}
+{"step":4,"data": 1000}
 
 Step 0
 {"step":0,"data":null}
@@ -207,10 +202,13 @@ Step 0
     return res;
   }
 
-  // async voiceOpenAIProcessing(voiceBuffer: Buffer, user: ServerUser) {
-  //   const text = await this.transcribe(voiceBuffer);
-  //   const accounts = user.accounts.map((a) => a.name);
-  //   const res = await this.choosingNextStep(text, accounts);
-  //   return res;
-  // }
+  async voiceOpenAIProcessing(
+    voiceBuffer: Buffer,
+    userAccounts: AccountNameAndId[],
+  ) {
+    const text = await this.transcribe(voiceBuffer);
+    const accounts = userAccounts.map((a) => a.name);
+    const res = await this.choosingNextStep(text, accounts);
+    return res;
+  }
 }

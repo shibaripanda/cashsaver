@@ -29,7 +29,7 @@ export class BotKeyboardService {
     };
     const disableIfNoChecks = (ac: AccountForList) => {
       if (ac['count'] === 0) {
-        return 'disabled_zero_checks';
+        return 'disabled_zero_checks:' + ac.name;
       }
       return `myAcc:${ac._id.toString()}`;
     };
@@ -42,53 +42,53 @@ export class BotKeyboardService {
     return res.concat(this.keyboardMenuBut());
   }
 
-  keyboardMainMenu() {
-    const buttons = [
-      { t: 'Мои аккаунты', c: 'myAccounts', s: 'success' },
-      // { t: 'Расходы за сегодня', c: 'myAccounts', s: 'primary' },
-      // { t: 'Расходы за 7 дней', c: 'myMoney_7', s: 'primary' },
-      // { t: 'Расходы за 30 дней', c: 'myMoney_30', s: 'primary' },
-    ];
-    return buttons.map((b) => [{ text: b.t, callback_data: b.c, style: b.s }]);
-    // return [
-    //   [
-    //     {
-    //       text: `Мои аккаунты`,
-    //       callback_data: 'myAccounts',
-    //       style: 'success',
-    //     },
-    //   ],
-    //   [
-    //     {
-    //       text: `Расходы за сегодня`,
-    //       callback_data: 'money_1',
-    //       style: 'danger',
-    //     },
-    //   ],
-    //   [
-    //     {
-    //       text: `Расходы за 7 дней`,
-    //       callback_data: 'money_7',
-    //       style: 'primary',
-    //     },
-    //   ],
-    //   [
-    //     {
-    //       text: `Расходы за 30 дней`,
-    //       callback_data: 'money_30',
-    //     },
-    //   ],
-    //   [{ text: `Расходы за 180 дней`, callback_data: 'money_180' }],
-    //   [{ text: `Расходы за 365 дней`, callback_data: 'money_365' }],
-    // ];
-  }
+  // keyboardMainMenu() {
+  //   const buttons = [
+  //     { t: 'Мои аккаунты', c: 'myAccounts', s: 'success' },
+  //     // { t: 'Расходы за сегодня', c: 'myAccounts', s: 'primary' },
+  //     // { t: 'Расходы за 7 дней', c: 'myMoney_7', s: 'primary' },
+  //     // { t: 'Расходы за 30 дней', c: 'myMoney_30', s: 'primary' },
+  //   ];
+  //   return buttons.map((b) => [{ text: b.t, callback_data: b.c, style: b.s }]);
+  //   // return [
+  //   //   [
+  //   //     {
+  //   //       text: `Мои аккаунты`,
+  //   //       callback_data: 'myAccounts',
+  //   //       style: 'success',
+  //   //     },
+  //   //   ],
+  //   //   [
+  //   //     {
+  //   //       text: `Расходы за сегодня`,
+  //   //       callback_data: 'money_1',
+  //   //       style: 'danger',
+  //   //     },
+  //   //   ],
+  //   //   [
+  //   //     {
+  //   //       text: `Расходы за 7 дней`,
+  //   //       callback_data: 'money_7',
+  //   //       style: 'primary',
+  //   //     },
+  //   //   ],
+  //   //   [
+  //   //     {
+  //   //       text: `Расходы за 30 дней`,
+  //   //       callback_data: 'money_30',
+  //   //     },
+  //   //   ],
+  //   //   [{ text: `Расходы за 180 дней`, callback_data: 'money_180' }],
+  //   //   [{ text: `Расходы за 365 дней`, callback_data: 'money_365' }],
+  //   // ];
+  // }
 
   keyboardMenuButOk() {
     return [
       [
         {
           text: `Хорошо`,
-          callback_data: 'mainMenu',
+          callback_data: 'myAccounts',
           style: 'success',
         },
       ],

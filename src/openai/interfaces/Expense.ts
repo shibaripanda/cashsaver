@@ -1,14 +1,19 @@
+import { Types } from 'mongoose';
+
 export interface Expense {
   step: number;
-  data: CreateNewAccounts | CreateNewCheck;
+  data: CreateNewAccounts | CreateNewCheck | number | UpdateAccountsBudget;
 }
 
 export type CreateNewAccounts = string[];
-export type CreateNewCheck = NewCheck[];
+
+export type UpdateAccountsBudget = { account: string; budget: number }[];
 
 export interface NewCheck {
   account: string;
   info: string;
   cost: number;
-  _id: string;
+  account_id?: Types.ObjectId;
 }
+
+export type CreateNewCheck = NewCheck[];

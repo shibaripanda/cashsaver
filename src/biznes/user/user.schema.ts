@@ -18,6 +18,9 @@ export class User {
   @Prop()
   lastMessageId!: number;
 
+  @Prop()
+  mounthBudget!: number;
+
   @Prop({ default: 0 })
   use!: number;
 

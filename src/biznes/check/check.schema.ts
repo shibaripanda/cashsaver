@@ -10,6 +10,12 @@ export class Check {
 
   @Prop()
   cost!: number;
+
+  @Prop()
+  owner!: string;
+
+  createdAt!: Date;
+  updatedAt!: Date;
 }
 
 export const CheckSchema = SchemaFactory.createForClass(Check);

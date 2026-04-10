@@ -50,14 +50,31 @@ export class UserService {
     return res.accounts.map((ac) => ({ name: ac.name, _id: ac._id }));
   }
 
-  async getMyAccountListWithChecksSumsAndCounts(
+  async getMyAccountListWithChecksSumsAndCountsCurrentMounth(
     _id: Types.ObjectId,
   ): Promise<AccountForList[] | []> {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const endOfMonth = new Date();
+    endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+    endOfMonth.setDate(1);
+    endOfMonth.setHours(0, 0, 0, 0);
+
     const res = await this.userModel
       .findById(_id, { accounts: 1 })
       .populate({
         path: 'accounts',
-        populate: { path: 'checks' },
+        populate: {
+          path: 'checks',
+          match: {
+            createdAt: {
+              $gte: startOfMonth,
+              $lt: endOfMonth,
+            },
+          },
+        },
       })
       .lean()
       .exec();
@@ -118,21 +135,24 @@ export class UserService {
   }
 
   private async createNewUser(user: TelegramUser): Promise<UserDocument> {
-    const startAccounts = await this.accountService.createStartAccounts([
-      'Еда',
-      'Еда вне дома',
-      'Транспорт',
-      'Развлечения',
-      'Здоровье',
-      'Одежда',
-      'Коммуналка',
-      'Другое',
-    ]);
     const created = new this.userModel({
       telegram_id: user.id,
       language_code: user.language_code,
-      accounts: startAccounts.map((account) => account._id),
     });
+    const startAccounts = await this.accountService.createStartAccounts(
+      [
+        'Еда',
+        'Еда вне дома',
+        'Транспорт',
+        'Развлечения',
+        'Здоровье',
+        'Одежда',
+        'Коммуналка',
+        'Другое',
+      ],
+      created._id.toHexString(),
+    );
+    created.accounts = startAccounts;
     return created.save();
   }
 }

@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Account, AccountDocument } from './account.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
+import { CheckDocument } from '../check/check.schema';
 
 @Injectable()
 export class AccountService {
@@ -9,63 +10,77 @@ export class AccountService {
     @InjectModel(Account.name) private accountModel: Model<AccountDocument>,
   ) {}
 
-  // async getAccountWithChecks(_id: Types.ObjectId) {
-  //   console.log(_id);
+  async updateBudget(_id: Types.ObjectId, budget: number) {
+    const res = await this.accountModel.updateOne(
+      { _id },
+      {
+        $set: {
+          budget,
+        },
+      },
+    );
+    return res;
+  }
 
-  //   const startOfMonth = new Date();
-  //   startOfMonth.setDate(1);
-  //   startOfMonth.setHours(0, 0, 0, 0);
+  async getAccountWithChecks(_id: Types.ObjectId) {
+    console.log(_id);
 
-  //   const endOfMonth = new Date();
-  //   endOfMonth.setMonth(endOfMonth.getMonth() + 1);
-  //   endOfMonth.setDate(1);
-  //   endOfMonth.setHours(0, 0, 0, 0);
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
 
-  //   const res = await this.accountModel
-  //     .findById(_id)
-  //     .populate({
-  //       path: 'checks',
-  //       match: {
-  //         createdAt: {
-  //           $gte: startOfMonth,
-  //           $lt: endOfMonth,
-  //         },
-  //       },
-  //     })
-  //     .lean()
-  //     .exec();
-  //   // const res = await this.accountModel
-  //   //   .findById(_id)
-  //   //   .populate({
-  //   //     path: 'checks',
-  //   //   })
-  //   //   .lean()
-  //   //   .exec();
-  //   // console.log(res);
-  //   return res;
-  // }
+    const endOfMonth = new Date();
+    endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+    endOfMonth.setDate(1);
+    endOfMonth.setHours(0, 0, 0, 0);
 
-  // async addNewCheck(account_Id: Types.ObjectId, newCheck: CheckDocument) {
-  //   const res = await this.accountModel.updateOne(
-  //     { _id: account_Id },
-  //     {
-  //       $addToSet: {
-  //         checks: newCheck._id,
-  //       },
-  //     },
-  //   );
-  //   return res;
-  // }
+    const res = await this.accountModel
+      .findById(_id)
+      .populate({
+        path: 'checks',
+        match: {
+          createdAt: {
+            $gte: startOfMonth,
+            $lt: endOfMonth,
+          },
+        },
+      })
+      .exec();
+    // const res = await this.accountModel
+    //   .findById(_id)
+    //   .populate({
+    //     path: 'checks',
+    //   })
+    //   .lean()
+    //   .exec();
+    // console.log(res);
+    return res;
+  }
 
-  async createNewAccounts(newAccounts: string[]): Promise<AccountDocument[]> {
+  async addNewCheck(account_Id: Types.ObjectId, newCheck: CheckDocument) {
+    const res = await this.accountModel.updateOne(
+      { _id: account_Id },
+      {
+        $addToSet: {
+          checks: newCheck,
+        },
+      },
+    );
+    return res;
+  }
+
+  async createNewAccounts(
+    newAccounts: string[],
+    owner: string,
+  ): Promise<AccountDocument[]> {
     return await this.accountModel.insertMany(
-      newAccounts.map((name) => ({ name })),
+      newAccounts.map((name) => ({ name, owner })),
     );
   }
 
-  async createStartAccounts(startAccounts: string[]) {
+  async createStartAccounts(startAccounts: string[], owner: string) {
     return await this.accountModel.insertMany(
-      startAccounts.map((name) => ({ name })),
+      startAccounts.map((name) => ({ name, owner })),
     );
   }
 }
