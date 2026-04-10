@@ -120,7 +120,7 @@ export class BotTextService {
   }
 
   textSuccsessNewAccount(accounts: string[]) {
-    return `✅ Акаунт(ы) созданы:\n${accounts.join(', ')}`;
+    return `✅ Аккаунт(ы) созданы:\n${accounts.join(', ')}`;
   }
 
   // textSuccsessNewCheck(checks: Check1[]) {

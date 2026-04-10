@@ -57,7 +57,7 @@ export class AccountService {
   //   return res;
   // }
 
-  async createNewAccounts(newAccounts: string[]) {
+  async createNewAccounts(newAccounts: string[]): Promise<AccountDocument[]> {
     return await this.accountModel.insertMany(
       newAccounts.map((name) => ({ name })),
     );

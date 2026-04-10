@@ -83,9 +83,9 @@ export class BotBiznesService {
   // }
 
   private async createNewAccounts(user: UserDocument, data: CreateNewAccounts) {
-    const newAccounts_ids = await this.accountService.createNewAccounts(data);
-    for (const account_id of newAccounts_ids.map((a) => a._id)) {
-      user.accounts.push(account_id);
+    const newAccounts = await this.accountService.createNewAccounts(data);
+    for (const account of newAccounts) {
+      await user.updateOne({ $addToSet: { accounts: account } }).exec();
     }
     await user.save();
     return {
