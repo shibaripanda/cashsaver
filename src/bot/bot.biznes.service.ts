@@ -1,12 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BotKeyboardService } from './bot.keyboard.service';
 import { BotTextService } from './bot.text.service';
-import {
-  CreateNewAccounts,
-  CreateNewCheck,
-  Expense,
-  UpdateAccountsBudget,
-} from 'src/openai/interfaces/Expense';
+import { CreateNewAccounts, CreateNewCheck, Expense, UpdateAccountsBudget } from 'src/openai/interfaces/Expense';
 import { AccountNameAndId } from 'src/openai/interfaces/UserAccounts';
 import { AccountService } from 'src/biznes/account/account.service';
 import { UserDocument } from 'src/biznes/user/user.schema';
@@ -23,10 +18,7 @@ export class BotBiznesService {
   ) {}
 
   accountWhithCheckList(accountWhithCheck: AccountDocument) {
-    const count = accountWhithCheck.checks.reduce(
-      (acc, ch) => acc + ch.cost,
-      0,
-    );
+    const count = accountWhithCheck.checks.reduce((acc, ch) => acc + ch.cost, 0);
 
     return {
       text: this.botTextService.textCheckList(
@@ -54,32 +46,17 @@ export class BotBiznesService {
     };
   }
 
-  async biznesStep(
-    user: UserDocument,
-    openAIresponce: Expense,
-    userAccounts: AccountNameAndId[],
-  ) {
+  async biznesStep(user: UserDocument, openAIresponce: Expense, userAccounts: AccountNameAndId[]) {
     if (openAIresponce.step === 1) {
-      return await this.createNewAccounts(
-        user,
-        openAIresponce.data as CreateNewAccounts,
-      );
+      return await this.createNewAccounts(user, openAIresponce.data as CreateNewAccounts);
     }
 
     if (openAIresponce.step === 2) {
-      return await this.createNewCheck(
-        user,
-        openAIresponce.data as CreateNewCheck,
-        userAccounts,
-      );
+      return await this.createNewCheck(user, openAIresponce.data as CreateNewCheck, userAccounts);
     }
 
     if (openAIresponce.step === 3) {
-      return await this.updateAccountsBudget(
-        user,
-        openAIresponce.data as UpdateAccountsBudget,
-        userAccounts,
-      );
+      return await this.updateAccountsBudget(user, openAIresponce.data as UpdateAccountsBudget, userAccounts);
     }
 
     if (openAIresponce.step === 4) {
@@ -92,15 +69,9 @@ export class BotBiznesService {
     };
   }
 
-  private async updateAccountsBudget(
-    user: UserDocument,
-    data: UpdateAccountsBudget,
-    userAccounts: AccountNameAndId[],
-  ) {
+  private async updateAccountsBudget(user: UserDocument, data: UpdateAccountsBudget, userAccounts: AccountNameAndId[]) {
     for (const ac of data) {
-      const accountId = userAccounts.find(
-        (item) => item.name === ac.account,
-      )?._id;
+      const accountId = userAccounts.find((item) => item.name === ac.account)?._id;
       if (accountId) {
         await this.accountService.updateBudget(accountId, ac.budget);
       }
@@ -119,20 +90,11 @@ export class BotBiznesService {
     };
   }
 
-  private async createNewCheck(
-    user: UserDocument,
-    data: CreateNewCheck,
-    userAccounts: AccountNameAndId[],
-  ) {
+  private async createNewCheck(user: UserDocument, data: CreateNewCheck, userAccounts: AccountNameAndId[]) {
     for (const newCheck of data) {
-      const accountId = userAccounts.find(
-        (item) => item.name === newCheck.account,
-      )?._id;
+      const accountId = userAccounts.find((item) => item.name === newCheck.account)?._id;
       if (accountId) {
-        const createdCheck = await this.checkService.createNewCheck(
-          newCheck,
-          user._id.toHexString(),
-        );
+        const createdCheck = await this.checkService.createNewCheck(newCheck, user._id.toHexString());
         await this.accountService.addNewCheck(accountId, createdCheck);
       }
     }
@@ -143,10 +105,7 @@ export class BotBiznesService {
   }
 
   private async createNewAccounts(user: UserDocument, data: CreateNewAccounts) {
-    const newAccounts = await this.accountService.createNewAccounts(
-      data,
-      user._id.toHexString(),
-    );
+    const newAccounts = await this.accountService.createNewAccounts(data, user._id.toHexString());
     for (const account of newAccounts) {
       await user.updateOne({ $addToSet: { accounts: account } }).exec();
     }

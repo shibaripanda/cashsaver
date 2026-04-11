@@ -44,26 +44,14 @@ export class BotService {
   //   return res;
   // }
 
-  async textMessageProcessing(
-    text: string,
-    userAccounts: AccountNameAndId[],
-  ): Promise<Expense> {
-    const res = await this.openaiVoiceService.textOpenAIProcessing(
-      text,
-      userAccounts,
-    );
+  async textMessageProcessing(text: string, userAccounts: AccountNameAndId[]): Promise<Expense> {
+    const res = await this.openaiVoiceService.textOpenAIProcessing(text, userAccounts);
     return res;
   }
 
-  async voiceMessageProcessing(
-    voiceFile_id: string,
-    userAccounts: AccountNameAndId[],
-  ): Promise<Expense> {
+  async voiceMessageProcessing(voiceFile_id: string, userAccounts: AccountNameAndId[]): Promise<Expense> {
     const voiceBuffer = await this.getVoiceBuffer(voiceFile_id);
-    const res = await this.openaiVoiceService.voiceOpenAIProcessing(
-      voiceBuffer,
-      userAccounts,
-    );
+    const res = await this.openaiVoiceService.voiceOpenAIProcessing(voiceBuffer, userAccounts);
     return res;
   }
 
@@ -107,40 +95,22 @@ export class BotService {
   //   return data.user;
   // }
 
-  async sendMessageReplyAction(
-    ctx: CallbackContext,
-    text: string,
-    keyboard?: InlineKeyboardButton[][],
-  ): Promise<void> {
+  async sendMessageReplyAction(ctx: CallbackContext, text: string, keyboard?: InlineKeyboardButton[][]): Promise<void> {
     const mes = await this.bot.telegram.sendMessage(ctx.from.id, text, {
       reply_markup: keyboard && { inline_keyboard: keyboard },
       parse_mode: 'HTML',
     });
-    await this.deleteOrUpdateMessage(
-      ctx.from.id,
-      ctx.simpleUserDocument.lastMessageId,
-    );
-    await ctx.simpleUserDocument
-      .updateOne({ lastMessageId: mes.message_id })
-      .exec();
+    await this.deleteOrUpdateMessage(ctx.from.id, ctx.simpleUserDocument.lastMessageId);
+    await ctx.simpleUserDocument.updateOne({ lastMessageId: mes.message_id }).exec();
   }
 
-  async sendMessageReply(
-    ctx: UserContext,
-    text: string,
-    keyboard?: InlineKeyboardButton[][],
-  ): Promise<void> {
+  async sendMessageReply(ctx: UserContext, text: string, keyboard?: InlineKeyboardButton[][]): Promise<void> {
     const mes = await this.bot.telegram.sendMessage(ctx.from.id, text, {
       reply_markup: keyboard && { inline_keyboard: keyboard },
       parse_mode: 'HTML',
     });
-    await this.deleteOrUpdateMessage(
-      ctx.from.id,
-      ctx.simpleUserDocument.lastMessageId,
-    );
-    await ctx.simpleUserDocument
-      .updateOne({ lastMessageId: mes.message_id })
-      .exec();
+    await this.deleteOrUpdateMessage(ctx.from.id, ctx.simpleUserDocument.lastMessageId);
+    await ctx.simpleUserDocument.updateOne({ lastMessageId: mes.message_id }).exec();
   }
 
   private async deleteOrUpdateMessage(chatId: number, message_id: number) {

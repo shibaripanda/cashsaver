@@ -36,16 +36,10 @@ export class TelegramGateway {
     console.log(ctx.simpleUserDocument);
 
     const MyAccountListWithChecksSumsAndCounts =
-      await this.userService.getMyAccountListWithChecksSumsAndCountsCurrentMounth(
-        ctx.simpleUserDocument._id,
-      );
+      await this.userService.getMyAccountListWithChecksSumsAndCountsCurrentMounth(ctx.simpleUserDocument._id);
     if (!MyAccountListWithChecksSumsAndCounts) return;
-    const text = this.botTextService.textMyAccounts(
-      MyAccountListWithChecksSumsAndCounts,
-    );
-    const keyboard = this.botKeyboardService.keyboardMyAccounts(
-      MyAccountListWithChecksSumsAndCounts,
-    );
+    const text = this.botTextService.textMyAccounts(MyAccountListWithChecksSumsAndCounts);
+    const keyboard = this.botKeyboardService.keyboardMyAccounts(MyAccountListWithChecksSumsAndCounts);
     await this.botService.sendMessageReply(ctx, text, keyboard);
   }
 
@@ -57,12 +51,9 @@ export class TelegramGateway {
     await ctx.answerCbQuery();
     if (!match) return;
     await ctx.sendChatAction('typing');
-    const accountWithChecks = await this.accountService.getAccountWithChecks(
-      new mongoose.Types.ObjectId(match[1]),
-    );
+    const accountWithChecks = await this.accountService.getAccountWithChecks(new mongoose.Types.ObjectId(match[1]));
     if (!accountWithChecks) return;
-    const { text, keyboard } =
-      this.botBiznesService.accountWhithCheckList(accountWithChecks);
+    const { text, keyboard } = this.botBiznesService.accountWhithCheckList(accountWithChecks);
 
     await this.botService.sendMessageReplyAction(ctx, text, keyboard);
   }
@@ -83,16 +74,10 @@ export class TelegramGateway {
     await ctx.answerCbQuery();
     await ctx.sendChatAction('typing');
     const MyAccountListWithChecksSumsAndCounts =
-      await this.userService.getMyAccountListWithChecksSumsAndCountsCurrentMounth(
-        ctx.simpleUserDocument._id,
-      );
+      await this.userService.getMyAccountListWithChecksSumsAndCountsCurrentMounth(ctx.simpleUserDocument._id);
     if (!MyAccountListWithChecksSumsAndCounts) return;
-    const text = this.botTextService.textMyAccounts(
-      MyAccountListWithChecksSumsAndCounts,
-    );
-    const keyboard = this.botKeyboardService.keyboardMyAccounts(
-      MyAccountListWithChecksSumsAndCounts,
-    );
+    const text = this.botTextService.textMyAccounts(MyAccountListWithChecksSumsAndCounts);
+    const keyboard = this.botKeyboardService.keyboardMyAccounts(MyAccountListWithChecksSumsAndCounts);
     await this.botService.sendMessageReply(ctx, text, keyboard);
   }
 
@@ -103,10 +88,7 @@ export class TelegramGateway {
     const match = text1.match(/^\/delch_(.+)$/i);
     if (!match) return;
     const _id = match[1];
-    const { text, keyboard } = await this.botBiznesService.deleteCheck(
-      _id,
-      ctx.simpleUserDocument._id.toHexString(),
-    );
+    const { text, keyboard } = await this.botBiznesService.deleteCheck(_id, ctx.simpleUserDocument._id.toHexString());
     await this.botService.sendMessageReply(ctx, text, keyboard);
   }
 
@@ -115,32 +97,18 @@ export class TelegramGateway {
   async onText(@Ctx() ctx: UserContext) {
     await ctx.sendChatAction('typing');
     const message = ctx.message;
-    const maxLengthTextMessage = Number(
-      this.config.get<string>('MAX_LENGTH_TEXT_MESSAGE')!,
-    );
+    const maxLengthTextMessage = Number(this.config.get<string>('MAX_LENGTH_TEXT_MESSAGE')!);
     console.log('DURATION:', message.text.length, '/', maxLengthTextMessage);
 
-    const userAccounts = await this.userService.getAccountNames(
-      ctx.simpleUserDocument._id,
-    );
+    const userAccounts = await this.userService.getAccountNames(ctx.simpleUserDocument._id);
     if (!userAccounts) return;
     if (message.text.length > maxLengthTextMessage) {
-      await this.botService.sendMessageReply(
-        ctx,
-        `kdkd\nMax length: ${maxLengthTextMessage}`,
-      );
+      await this.botService.sendMessageReply(ctx, `kdkd\nMax length: ${maxLengthTextMessage}`);
       return;
     }
-    const res = await this.botService.textMessageProcessing(
-      message.text,
-      userAccounts,
-    );
+    const res = await this.botService.textMessageProcessing(message.text, userAccounts);
     console.log(res);
-    const { text, keyboard } = await this.botBiznesService.biznesStep(
-      ctx.simpleUserDocument,
-      res,
-      userAccounts,
-    );
+    const { text, keyboard } = await this.botBiznesService.biznesStep(ctx.simpleUserDocument, res, userAccounts);
     await this.botService.sendMessageReply(ctx, text, keyboard);
   }
 
@@ -149,14 +117,10 @@ export class TelegramGateway {
   async onVoice(@Ctx() ctx: UserContext) {
     await ctx.sendChatAction('typing');
     const voice = ctx.message['voice'];
-    const maxLengthVoiceMessage = Number(
-      this.config.get<string>('MAX_LENGTH_VOICE_MESSAGE_SECONDS')!,
-    );
+    const maxLengthVoiceMessage = Number(this.config.get<string>('MAX_LENGTH_VOICE_MESSAGE_SECONDS')!);
     console.log('DURATION:', voice.duration, '/', maxLengthVoiceMessage);
 
-    const userAccounts = await this.userService.getAccountNames(
-      ctx.simpleUserDocument._id,
-    );
+    const userAccounts = await this.userService.getAccountNames(ctx.simpleUserDocument._id);
     if (!userAccounts) return;
     if (voice.duration > maxLengthVoiceMessage) {
       await this.botService.sendMessageReply(
@@ -165,15 +129,8 @@ export class TelegramGateway {
       );
       return;
     }
-    const res = await this.botService.voiceMessageProcessing(
-      voice.file_id,
-      userAccounts,
-    );
-    const { text, keyboard } = await this.botBiznesService.biznesStep(
-      ctx.simpleUserDocument,
-      res,
-      userAccounts,
-    );
+    const res = await this.botService.voiceMessageProcessing(voice.file_id, userAccounts);
+    const { text, keyboard } = await this.botBiznesService.biznesStep(ctx.simpleUserDocument, res, userAccounts);
     await this.botService.sendMessageReply(ctx, text, keyboard);
   }
 

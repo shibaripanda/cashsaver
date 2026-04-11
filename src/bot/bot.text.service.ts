@@ -7,12 +7,7 @@ import { AccountForList } from './interfaces/AccountForList';
 export class BotTextService {
   constructor() {}
 
-  textCheckList(
-    cost: number,
-    mounthBudget: number,
-    name: string,
-    checks: CheckDocument[],
-  ) {
+  textCheckList(cost: number, mounthBudget: number, name: string, checks: CheckDocument[]) {
     const MAX_LENGTH = 4096;
 
     const escapeHtml = (str: string = ''): string => {
@@ -38,16 +33,12 @@ export class BotTextService {
     };
 
     // сортировка: от старых к новым
-    const sorted = [...checks].sort(
-      (a, b) =>
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-    );
+    const sorted = [...checks].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
     const header = `<b>${escapeHtml(name)}</b>${mounthBudget ? ` (${mounthBudget})` : ''}\n-------\n`;
 
     const footerBase = (sum: number, hidden: number) =>
-      `\n<b>Итого за текущий месяц: ${sum}</b>` +
-      (hidden > 0 ? `\n<i>...ещё ${hidden} старых чеков</i>` : '');
+      `\n<b>Итого за текущий месяц: ${sum}</b>` + (hidden > 0 ? `\n<i>...ещё ${hidden} старых чеков</i>` : '');
 
     const blocks: string[] = [];
     let sum = 0;
@@ -115,10 +106,7 @@ export class BotTextService {
   }
 
   textMyAccounts(MyAccountListWithChecksSumsAndCounts: AccountForList[]) {
-    const sum = MyAccountListWithChecksSumsAndCounts.reduce(
-      (acc, ac) => acc + ac.sum,
-      0,
-    );
+    const sum = MyAccountListWithChecksSumsAndCounts.reduce((acc, ac) => acc + ac.sum, 0);
     return `Мои аккаунты \nИтого: ${sum}`;
   }
 

@@ -78,10 +78,7 @@ export class OpenaiVoiceService {
     return JSON.parse(jsonText) as Expense;
   }
 
-  private async choosingNextStep(
-    text: string,
-    accounts: string[],
-  ): Promise<Expense> {
+  private async choosingNextStep(text: string, accounts: string[]): Promise<Expense> {
     const res = await this.openaiReqest(
       `Ты — строго детерминированный классификатор намерения пользователя финансового ассистента.
 
@@ -136,7 +133,7 @@ Step 0 — непонятно
 Для Step 2:
 - использовать можно только категории из списка
 - категории вне списка игнорировать
-- с большой буквы
+- с большой буквы все расходы
 - если после фильтрации не осталось категорий → step 0
 - если категория не указана явно → step 0
 
@@ -157,13 +154,13 @@ Step 0 — непонятно
 ФОРМАТЫ ОТВЕТА
 
 Step 1
-{"step":1,"data": ["категория"]}
+{"step":1,"data": ["Категория"]}
 
 Step 2
-{"step":2,"data":[{"account":"категория","info":"описание","cost":100.50}]}
+{"step":2,"data":[{"account":"Категория","info":"Описание","cost":100.50}]}
 
 Step 3
-{"step":3,"data": [{"account":"категория","budget":100.50}]}
+{"step":3,"data": [{"account":"Категория","budget":100.50}]}
 
 Step 4
 {"step":4,"data": 1000}
@@ -202,10 +199,7 @@ Step 0
     return res;
   }
 
-  async voiceOpenAIProcessing(
-    voiceBuffer: Buffer,
-    userAccounts: AccountNameAndId[],
-  ) {
+  async voiceOpenAIProcessing(voiceBuffer: Buffer, userAccounts: AccountNameAndId[]) {
     const text = await this.transcribe(voiceBuffer);
     const accounts = userAccounts.map((a) => a.name);
     const res = await this.choosingNextStep(text, accounts);

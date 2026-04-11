@@ -1,0 +1,10 @@
+db
+dist
+envs
+node_modules
+.git
+.gitignore
+
+Dockerfile
+docker-compose.yml
+compose.prod.yml
