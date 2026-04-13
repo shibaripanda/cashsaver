@@ -107,7 +107,7 @@ export class BotTextService {
 
   textMyAccounts(MyAccountListWithChecksSumsAndCounts: AccountForList[]) {
     const sum = MyAccountListWithChecksSumsAndCounts.reduce((acc, ac) => acc + ac.sum, 0);
-    return `Мои аккаунты \nИтого: ${sum}`;
+    return `Мои аккаунты \nИтого: ${sum.toFixed(2)}`;
   }
 
   textMainMenu() {

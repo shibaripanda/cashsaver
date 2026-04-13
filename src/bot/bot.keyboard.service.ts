@@ -25,7 +25,7 @@ export class BotKeyboardService {
   keyboardMyAccounts(myAccounts: AccountForList[]) {
     const shotName = (ac: AccountForList) => {
       if (ac['count'] === 0) return ac.name;
-      return ac.name + ' 💵 ' + ac['sum'] + ` (${ac['count']})`;
+      return ac.name + ' 💵 ' + ac['sum'].toFixed(2) + ` (${ac['count']})`;
     };
     const disableIfNoChecks = (ac: AccountForList) => {
       if (ac['count'] === 0) {
