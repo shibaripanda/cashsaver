@@ -38,7 +38,8 @@ export class BotTextService {
     const header = `<b>${escapeHtml(name)}</b>${mounthBudget ? ` (${mounthBudget})` : ''}\n-------\n`;
 
     const footerBase = (sum: number, hidden: number) =>
-      `\n<b>Итого за текущий месяц: ${sum}</b>` + (hidden > 0 ? `\n<i>...ещё ${hidden} старых чеков</i>` : '');
+      `\n<b>Итого за текущий месяц: ${sum.toFixed(2)}</b>` +
+      (hidden > 0 ? `\n<i>...ещё ${hidden} старых чеков</i>` : '');
 
     const blocks: string[] = [];
     let sum = 0;
