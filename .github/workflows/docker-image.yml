@@ -44,6 +44,6 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           script: |
-            cd /cashsaver
+            cd /home/panda/cashsaver
             docker compose pull
             docker compose up -d
