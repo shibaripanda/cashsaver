@@ -106,9 +106,12 @@ export class BotTextService {
     return 'ответ';
   }
 
-  textMyAccounts(MyAccountListWithChecksSumsAndCounts: AccountForList[]) {
+  textMyAccounts(MyAccountListWithChecksSumsAndCounts: AccountForList[], user: { mounthBudget?: number }) {
+    const budjet = user.mounthBudget
+      ? `\nБюджет на месяц: ${user.mounthBudget.toFixed(2)}`
+      : 'Бюджет на месяц не установлен';
     const sum = MyAccountListWithChecksSumsAndCounts.reduce((acc, ac) => acc + ac.sum, 0);
-    return `Аккаунты \nС начала месяца: ${sum.toFixed(2)}`;
+    return `Аккаунты \nРасходы с начала месяца: ${sum.toFixed(2)}${budjet}`;
   }
 
   textMainMenu() {

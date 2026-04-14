@@ -38,7 +38,7 @@ export class TelegramGateway {
     const MyAccountListWithChecksSumsAndCounts =
       await this.userService.getMyAccountListWithChecksSumsAndCountsCurrentMounth(ctx.simpleUserDocument._id);
     if (!MyAccountListWithChecksSumsAndCounts) return;
-    const text = this.botTextService.textMyAccounts(MyAccountListWithChecksSumsAndCounts);
+    const text = this.botTextService.textMyAccounts(MyAccountListWithChecksSumsAndCounts, ctx.simpleUserDocument);
     const keyboard = this.botKeyboardService.keyboardMyAccounts(MyAccountListWithChecksSumsAndCounts);
     await this.botService.sendMessageReply(ctx, text, keyboard);
   }
@@ -76,7 +76,7 @@ export class TelegramGateway {
     const MyAccountListWithChecksSumsAndCounts =
       await this.userService.getMyAccountListWithChecksSumsAndCountsCurrentMounth(ctx.simpleUserDocument._id);
     if (!MyAccountListWithChecksSumsAndCounts) return;
-    const text = this.botTextService.textMyAccounts(MyAccountListWithChecksSumsAndCounts);
+    const text = this.botTextService.textMyAccounts(MyAccountListWithChecksSumsAndCounts, ctx.simpleUserDocument);
     const keyboard = this.botKeyboardService.keyboardMyAccounts(MyAccountListWithChecksSumsAndCounts);
     await this.botService.sendMessageReply(ctx, text, keyboard);
   }

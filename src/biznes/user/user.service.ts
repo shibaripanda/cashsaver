@@ -36,9 +36,7 @@ export class UserService {
   //   await this.userModel.updateOne({ t_Id }, { lastMessageId });
   // }
 
-  async getAccountNames(
-    _id: Types.ObjectId,
-  ): Promise<AccountNameAndId[] | false> {
+  async getAccountNames(_id: Types.ObjectId): Promise<AccountNameAndId[] | false> {
     const res = await this.userModel
       .findById(_id, { accounts: 1 })
       .populate({
@@ -50,9 +48,7 @@ export class UserService {
     return res.accounts.map((ac) => ({ name: ac.name, _id: ac._id }));
   }
 
-  async getMyAccountListWithChecksSumsAndCountsCurrentMounth(
-    _id: Types.ObjectId,
-  ): Promise<AccountForList[] | []> {
+  async getMyAccountListWithChecksSumsAndCountsCurrentMounth(_id: Types.ObjectId): Promise<AccountForList[] | []> {
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
@@ -119,14 +115,9 @@ export class UserService {
   //   };
   // }
 
-  async getNewOrExistSimpleUser(
-    telegramUser: TelegramUser,
-  ): Promise<UserDocument | null> {
+  async getNewOrExistSimpleUser(telegramUser: TelegramUser): Promise<UserDocument | null> {
     const ex = await this.userModel
-      .findOne(
-        { telegram_id: telegramUser.id },
-        { __v: 0, accounts: 0, updatedAt: 0, createdAt: 0 },
-      )
+      .findOne({ telegram_id: telegramUser.id }, { __v: 0, accounts: 0, updatedAt: 0, createdAt: 0 })
       .exec();
     if (ex) {
       return ex;
@@ -140,16 +131,7 @@ export class UserService {
       language_code: user.language_code,
     });
     const startAccounts = await this.accountService.createStartAccounts(
-      [
-        'Еда',
-        'Еда вне дома',
-        'Транспорт',
-        'Развлечения',
-        'Здоровье',
-        'Одежда',
-        'Коммуналка',
-        'Другое',
-      ],
+      ['Еда', 'Еда вне дома', 'Транспорт', 'Развлечения', 'Здоровье', 'Одежда', 'Коммуналка', 'Другое'],
       created._id.toHexString(),
     );
     created.accounts = startAccounts;
