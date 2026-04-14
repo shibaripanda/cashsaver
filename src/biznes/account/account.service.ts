@@ -6,9 +6,7 @@ import { CheckDocument } from '../check/check.schema';
 
 @Injectable()
 export class AccountService {
-  constructor(
-    @InjectModel(Account.name) private accountModel: Model<AccountDocument>,
-  ) {}
+  constructor(@InjectModel(Account.name) private accountModel: Model<AccountDocument>) {}
 
   async updateBudget(_id: Types.ObjectId, budget: number) {
     const res = await this.accountModel.updateOne(
@@ -69,18 +67,11 @@ export class AccountService {
     return res;
   }
 
-  async createNewAccounts(
-    newAccounts: string[],
-    owner: string,
-  ): Promise<AccountDocument[]> {
-    return await this.accountModel.insertMany(
-      newAccounts.map((name) => ({ name, owner })),
-    );
+  async createNewAccounts(newAccounts: string[], owner: string): Promise<AccountDocument[]> {
+    return await this.accountModel.insertMany(newAccounts.map((name) => ({ name, owner })));
   }
 
   async createStartAccounts(startAccounts: string[], owner: string) {
-    return await this.accountModel.insertMany(
-      startAccounts.map((name) => ({ name, owner })),
-    );
+    return await this.accountModel.insertMany(startAccounts.map((name) => ({ name, owner })));
   }
 }
