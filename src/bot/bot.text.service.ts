@@ -107,11 +107,12 @@ export class BotTextService {
   }
 
   textMyAccounts(MyAccountListWithChecksSumsAndCounts: AccountForList[], user: { mounthBudget?: number }) {
+    const line = '\n▫️▫️▫️▫️▫️▫️▫️▫️▫️';
     const budjet = user.mounthBudget
-      ? `\nБюджет на месяц: ${user.mounthBudget.toFixed(2)}`
-      : 'Бюджет на месяц не установлен';
+      ? `\nБюджет на месяц: ${user.mounthBudget.toFixed(2)}${line}`
+      : '\nБюджет на месяц не установлен' + line;
     const sum = MyAccountListWithChecksSumsAndCounts.reduce((acc, ac) => acc + ac.sum, 0);
-    return `Аккаунты \nРасходы с начала месяца: ${sum.toFixed(2)}${budjet}`;
+    return `Расходы с начала месяца: ${sum.toFixed(2)}${budjet}${line}`;
   }
 
   textMainMenu() {
