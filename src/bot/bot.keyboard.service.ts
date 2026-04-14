@@ -33,12 +33,14 @@ export class BotKeyboardService {
       }
       return `myAcc:${ac._id.toString()}`;
     };
-    const res = myAccounts.map((ac) => [
-      {
-        text: shotName(ac),
-        callback_data: disableIfNoChecks(ac),
-      },
-    ]);
+    const res = myAccounts
+      .sort((a, b) => b.sum - a.sum)
+      .map((ac) => [
+        {
+          text: shotName(ac),
+          callback_data: disableIfNoChecks(ac),
+        },
+      ]);
     return res.concat(this.keyboardMenuBut());
   }
 
