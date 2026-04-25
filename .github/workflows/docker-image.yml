@@ -2,7 +2,7 @@ name: Deploy to VPS
 
 on:
   push:
-    branches: ["main"]
+    branches: ['main']
 
 jobs:
   deploy:
@@ -45,20 +45,21 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           script: |
             cd /home/panda/cashsaver
-          
+
             export $(grep -v '^#' .env | xargs)
-          
+
             # backup
-            docker exec cashsaver_mongo mongodump \
-              -u $MONGO_ROOT_USERNAME \
-              -p $MONGO_ROOT_PASSWORD \
-              --authenticationDatabase admin \
-              --archive=/backups/backup_$(date +%F_%H-%M).gz \
-              --gzip
-          
+            /home/panda/myScripts/db_backup.sh
+            # docker exec cashsaver_mongo mongodump \
+            #   -u $MONGO_ROOT_USERNAME \
+            #   -p $MONGO_ROOT_PASSWORD \
+            #   --authenticationDatabase admin \
+            #   --archive=/backups/backup_$(date +%F_%H-%M).gz \
+            #   --gzip
+
             # deploy
             docker compose pull
             docker compose up -d
-          
+
             # cleanup
             docker image prune -f
