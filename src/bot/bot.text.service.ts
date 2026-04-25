@@ -112,7 +112,7 @@ export class BotTextService {
       ? `Бюджет на месяц: ${user.mounthBudget.toFixed(2)}`
       : 'Бюджет на месяц не установлен';
     const sum = MyAccountListWithChecksSumsAndCounts.reduce((acc, ac) => acc + ac.sum, 0);
-    const startText = `Расходы с начала месяцаа: ${sum.toFixed(2)}`;
+    const startText = `Расходы с начала месяца: ${sum.toFixed(2)}`;
     return `▪️${startText}${line}\n▪️${budjet}${line}`;
   }
 
