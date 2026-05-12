@@ -1,6 +1,6 @@
 // import { UseGuards } from '@nestjs/common';
 // import { CallbackQuery, Message } from '@telegraf/types';
-import { Action, Ctx, Hears, On, Start, Update } from 'nestjs-telegraf';
+import { Action, Command, Ctx, Hears, On, Start, Update } from 'nestjs-telegraf';
 // import { AdminAccessGuard } from './guards/access-control.guard';
 import { ConfigService } from '@nestjs/config';
 import { BotService } from './bot.service';
@@ -14,10 +14,12 @@ import { BotBiznesService } from './bot.biznes.service';
 import { CallbackQuery } from 'node_modules/telegraf/typings/core/types/typegram';
 import { AccountService } from 'src/biznes/account/account.service';
 import mongoose from 'mongoose';
+import { AppService } from 'src/app/app.service';
 
 @Update()
 export class TelegramGateway {
   constructor(
+    private appService: AppService,
     private botService: BotService,
     private botKeyboardService: BotKeyboardService,
     private botTextService: BotTextService,
@@ -41,6 +43,14 @@ export class TelegramGateway {
     const text = this.botTextService.textMyAccounts(MyAccountListWithChecksSumsAndCounts, ctx.simpleUserDocument);
     const keyboard = this.botKeyboardService.keyboardMyAccounts(MyAccountListWithChecksSumsAndCounts);
     await this.botService.sendMessageReply(ctx, text, keyboard);
+  }
+
+  @Command('enter')
+  @UseGuards(AccessGuard)
+  async getAuthLink(@Ctx() ctx: UserContext) {
+    await ctx.reply(this.appService.getAuthLink(ctx.from.id)).catch((e) => {
+      console.log(e);
+    });
   }
 
   @UseGuards(AccessGuard)

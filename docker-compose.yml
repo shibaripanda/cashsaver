@@ -5,7 +5,7 @@ services:
     ports:
     - "27017:27017"
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/serviceapp --quiet
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/game_v2 --quiet
     restart: always
     volumes:
       - ./db/data:/data/db

@@ -8,6 +8,11 @@ import { CheckModule } from 'src/biznes/check/check.module';
 import { ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { OpenaiModule } from 'src/openai/openai.module';
+import { JwtModule } from '@nestjs/jwt';
+import { StringValue } from 'ms';
+import { AppController } from './app.controller';
+import { AppGateway } from './app.gateway';
+import { WebModule } from 'src/web/web.module';
 
 @Global()
 @Module({
@@ -18,6 +23,17 @@ import { OpenaiModule } from 'src/openai/openai.module';
       }),
       inject: [ConfigService],
     }),
+    JwtModule.registerAsync({
+      global: true,
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET')!,
+        signOptions: {
+          expiresIn: configService.get<string>('LIFI_TIME_TOKEN')! as StringValue,
+        },
+      }),
+    }),
+    WebModule,
     GlobalConfigModule,
     BotModule,
     UserModule,
@@ -25,7 +41,8 @@ import { OpenaiModule } from 'src/openai/openai.module';
     CheckModule,
     OpenaiModule,
   ],
-  providers: [AppService],
+  controllers: [AppController],
+  providers: [AppService, AppGateway],
   exports: [AppService],
 })
 export class AppModule {}

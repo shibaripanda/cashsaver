@@ -7,6 +7,7 @@ import { CheckService } from '../check/check.service';
 import type { User as TelegramUser } from '@telegraf/types';
 import { AccountForList } from 'src/bot/interfaces/AccountForList';
 import { AccountNameAndId } from 'src/openai/interfaces/UserAccounts';
+import { Account } from '../account/account.schema';
 // import { Types } from 'telegraf';
 
 // import { User as TelegramUser } from 'telegraf';
@@ -18,6 +19,65 @@ export class UserService {
     private accountService: AccountService,
     private checkService: CheckService,
   ) {}
+
+  async getAllDataByMounth(telegram_id: number, mounth: number): Promise<Account[] | []> {
+    const year = new Date().getFullYear();
+
+    const startOfMonth = new Date(year, mounth, 1, 0, 0, 0, 0);
+
+    const endOfMonth = new Date(year, mounth + 1, 1, 0, 0, 0, 0);
+
+    const res = await this.userModel
+      .findOne({ telegram_id }, { accounts: 1 })
+      .populate({
+        path: 'accounts',
+        populate: {
+          path: 'checks',
+          match: {
+            createdAt: {
+              $gte: startOfMonth,
+              $lt: endOfMonth,
+            },
+          },
+        },
+      })
+      .lean()
+      .exec();
+
+    if (!res) return [];
+
+    return res.accounts;
+  }
+
+  // async getAllDataByMounth({ telegram_id, mounth }: { telegram_id: number; mounth: number; }): Promise<Account[] | []> {
+  //   const startOfMonth = new Date();
+  //   startOfMonth.setDate(1);
+  //   startOfMonth.setHours(0, 0, 0, 0);
+
+  //   const endOfMonth = new Date();
+  //   endOfMonth.setMonth(mounth + 1);
+  //   endOfMonth.setDate(1);
+  //   endOfMonth.setHours(0, 0, 0, 0);
+
+  //   const res = await this.userModel
+  //     .findOne({ telegram_id }, { accounts: 1 })
+  //     .populate({
+  //       path: 'accounts',
+  //       populate: {
+  //         path: 'checks',
+  //         match: {
+  //           createdAt: {
+  //             $gte: startOfMonth,
+  //             $lt: endOfMonth,
+  //           },
+  //         },
+  //       },
+  //     })
+  //     .lean()
+  //     .exec();
+  //   if (!res) return [];
+  //   return res.accounts;
+  // }
 
   // async getAccountWithChecks(value: GetAccountWithChecks) {
   //   const res = await this.accountService.getAccountWithChecks(
