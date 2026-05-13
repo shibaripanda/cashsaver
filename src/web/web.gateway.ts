@@ -1,16 +1,8 @@
 import { JwtService } from '@nestjs/jwt';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
-// import { Socket } from 'socket.io';
 import { AccountService } from 'src/biznes/account/account.service';
 import { WebService } from './web.service';
 import { MySocket } from 'src/app/app.gateway';
-// import { Types } from 'mongoose';
-
-// export interface MySocket extends Socket {
-//   data: {
-//     user: { userId: string; iat: number; exp: number };
-//   };
-// }
 
 @WebSocketGateway({
   cors: { origin: '*' },

@@ -31,21 +31,6 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @WebSocketServer()
   // server: Server;
-  // @SubscribeMessage('get_account_mounth')
-  // async handleGetMyAccountData(
-  //   @ConnectedSocket() client: MySocket,
-  //   @MessageBody() data: { mounth: number; account_id: Types.ObjectId },
-  // ) {
-  //   return await this.accountService.getAccountWithChecksMounth(data.account_id, data.mounth);
-  // }
-
-  // @SubscribeMessage('get_my_data_mounth')
-  // async handleGetMyDataThisMonth(@ConnectedSocket() client: MySocket, @MessageBody() data: { mounth: number }) {
-  //   return await this.appService.getMyAccountListWithChecksSumsAndCountsCurrentMounth(
-  //     client.data.user.userId,
-  //     data.mounth,
-  //   );
-  // }
   handleConnection(client: MySocket) {
     const token: string = client.handshake.auth?.token as string;
     if (!token) {

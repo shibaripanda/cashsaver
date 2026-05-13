@@ -17,9 +17,7 @@ export class AppController {
 
   @Get('access/:token')
   async checkToken(@Param('token') startToken: string) {
-    console.log(startToken);
     const res = await this.appService.validateToken(startToken);
-    console.log(res);
     if (!res) {
       throw new ForbiddenException('Недействительный токен');
     }
